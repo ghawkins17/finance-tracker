@@ -1,3 +1,7 @@
+/**
+ * Returns the most recent transactions.
+ * This is currently mock data and will later come from PostgreSQL.
+ */
 export function getRecentTransactions() {
     return [
         // Sample transaction data

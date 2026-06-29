@@ -16,7 +16,7 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// api dashboard endpoint
+// Mounts all dashboard-related API routes under /api/dashboard.
 app.use("/api/dashboard", dashboardRouter);
 
 // api recent transactions endpoint

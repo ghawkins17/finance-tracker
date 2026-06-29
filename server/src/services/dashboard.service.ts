@@ -1,3 +1,7 @@
+/**
+ * Returns the dashboard summary data.
+ * 
+ */
 export function getDashboardSummary() {
   return {
     balance: 4328.52,
