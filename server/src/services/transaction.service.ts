@@ -1,12 +1,35 @@
+import prisma from "../lib/prisma.js";
+
 /**
- * Returns the most recent transactions.
- * This is currently mock data and will later come from PostgreSQL.
+ * Retrieves all transactions from the PostgreSQL database.
+ * Transactions are returned with the most recently created first.
  */
-export function getRecentTransactions() {
-    return [
-        // Sample transaction data
-        { id: 1, name: "Salary", amount: 5000, type: "income" },
-        { id: 2, name: "Groceries", amount: 200, type: "expense" },
-        { id: 3, name: "Electricity Bill", amount: 150, type: "expense" }
-    ];
+
+
+
+export async function getRecentTransactions() {
+    return await prisma.transaction.findMany({
+        orderBy: {
+            createdAt: "desc",
+        },
+    });
+}
+
+/**
+ * Creates a new transaction in the PostgreSQL database.
+ */
+export async function createTransaction(
+    amount: number,
+    description: string,
+    category: string,
+    type: string
+) {
+    return await prisma.transaction.create({
+        data: {
+            amount,
+            description,
+            category,
+            type,
+        },
+    });
 }
