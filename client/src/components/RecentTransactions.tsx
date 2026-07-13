@@ -8,7 +8,11 @@ type Transaction = {
   type: "income" | "expense";
 };
 
-export default function RecentTransactions() {
+type RecentTransactionsProps = {
+  refreshKey: number;
+};
+
+export default function RecentTransactions({ refreshKey }: RecentTransactionsProps) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
@@ -18,7 +22,7 @@ export default function RecentTransactions() {
     }
 
     fetchTransactions();
-  }, []);
+  }, [refreshKey]);
 
   return (
     <div className="rounded-xl bg-slate-800 p-6 shadow-lg">

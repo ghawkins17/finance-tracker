@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import SummaryCard from "../components/SummaryCard";
 import RecentTransactions from "../components/RecentTransactions";
+import AddTransactionForm from "../components/AddTransactionForm";
 import api from "../services/api";
 
 type DashboardSummary = {
@@ -8,6 +9,8 @@ type DashboardSummary = {
   income: number;
   expenses: number;
 };
+
+const [refreshKey, setRefreshKey] = useState(0);
 
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
@@ -19,7 +22,7 @@ export default function DashboardPage() {
     }
 
     fetchSummary();
-  }, []);
+  }, [refreshKey]);
 
   if (!summary) {
     return <p className="px-8 py-10 text-slate-400">Loading dashboard...</p>;
@@ -34,6 +37,10 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      <div className="mb-8 rounded-xl bg-slate-800 p-6">
+        <AddTransactionForm onTransactionAdded={handleTransactionAdded} />
+      </div>
+
       <div className="grid gap-6 md:grid-cols-3">
         <SummaryCard title="Balance" amount={`$${summary.balance}`} />
         <SummaryCard title="Income" amount={`$${summary.income}`} />
@@ -41,8 +48,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <RecentTransactions />
+        <RecentTransactions refreshKey={refreshKey} />
       </div>
     </section>
   );
+
+  function handleTransactionAdded(){
+    setRefreshKey((currentKey) => currentKey + 1);
+  }
 }
