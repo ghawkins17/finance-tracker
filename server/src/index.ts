@@ -3,7 +3,7 @@ import express from "express";
 import cors from "cors";
 
 import dashboardRouter from "./routes/dashboard.route.js";
-import transactionRouter from "./routes/transaction.route.js";
+import transactionRouter from "./routes/transaction.route.js";  
 
 const app = express();
 
@@ -24,8 +24,17 @@ app.use("/api/dashboard", dashboardRouter);
 // Mounts all transaction-related API routes under /api/transactions.
 app.use("/api/transactions", transactionRouter);
 
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+app.get("/", (_req, res) => {
+    res.json({ message: "Server root works" });
+});
+
+const server = app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is actually listening on port ${PORT}`);
+    console.log(`Test: http://127.0.0.1:${PORT}/`);
+});
+
+server.on("error", (error) => {
+    console.error("Server failed to start:", error);
 });
