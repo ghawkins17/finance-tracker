@@ -15,21 +15,23 @@ export async function getRecentTransactions() {
     });
 }
 
+type CreateTransactionData = {
+    amount: number;
+    description: string;
+    category: string;
+    type: string;
+};
+
 /**
  * Creates a new transaction in the PostgreSQL database.
  */
-export async function createTransaction(
-    amount: number,
-    description: string,
-    category: string,
-    type: string
-) {
+export async function createTransaction(data: CreateTransactionData) {
     return await prisma.transaction.create({
         data: {
-            amount,
-            description,
-            category,
-            type,
+            amount: data.amount,
+            description: data.description,
+            category: data.category,
+            type: data.type,
         },
     });
 }

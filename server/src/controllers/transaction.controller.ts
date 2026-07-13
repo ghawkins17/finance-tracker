@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import {
+    createTransaction as saveTransaction,
     getRecentTransactions as fetchRecentTransactions,
-    createTransaction as createNewTransaction,
 } from "../services/transaction.service.js";
 
 /**
@@ -34,18 +34,30 @@ export async function createTransaction(
     try {
         const { amount, description, category, type } = req.body;
 
-        const transaction = await createNewTransaction(
+        if (
+            typeof amount !== "number" ||
+            typeof description !== "string" ||
+            typeof category !== "string" ||
+            typeof type !== "string"
+        ) {
+            return res.status(400).json({
+                message:
+                    "amount, description, category, and type are required.",
+            });
+        }
+
+        const transaction = await saveTransaction({
             amount,
             description,
             category,
-            type
-        );
+            type,
+        });
 
-        res.status(201).json(transaction);
+        return res.status(201).json(transaction);
     } catch (error) {
         console.error("Error creating transaction:", error);
 
-        res.status(500).json({
+        return res.status(500).json({
             message: "Failed to create transaction.",
         });
     }
