@@ -1,7 +1,8 @@
 import type { Request, Response } from "express";
 import {
-    createTransaction as saveTransaction,
-    getRecentTransactions as fetchRecentTransactions,
+  createTransaction as saveTransaction,
+  deleteTransaction as removeTransaction,
+  getRecentTransactions as fetchRecentTransactions,
 } from "../services/transaction.service.js";
 
 /**
@@ -61,4 +62,32 @@ export async function createTransaction(
             message: "Failed to create transaction.",
         });
     }
+}
+
+/**
+ * Deletes a transaction by its ID.
+ */
+export async function deleteTransaction(
+  req: Request,
+  res: Response
+) {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        message: "A valid transaction ID is required.",
+      });
+    }
+
+    const deletedTransaction = await removeTransaction(id);
+
+    return res.json(deletedTransaction);
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+
+    return res.status(500).json({
+      message: "Failed to delete transaction.",
+    });
+  }
 }

@@ -10,10 +10,9 @@ type DashboardSummary = {
   expenses: number;
 };
 
-const [refreshKey, setRefreshKey] = useState(0);
-
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     async function fetchSummary() {
@@ -42,9 +41,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <SummaryCard title="Balance" amount={`$${summary.balance}`} />
-        <SummaryCard title="Income" amount={`$${summary.income}`} />
-        <SummaryCard title="Expenses" amount={`$${summary.expenses}`} />
+        <SummaryCard title="Balance" amount={`$${summary.balance.toFixed(2)}`} />
+        <SummaryCard title="Income" amount={`$${summary.income.toFixed(2)}`} />
+        <SummaryCard title="Expenses" amount={`$${summary.expenses.toFixed(2)}`} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">

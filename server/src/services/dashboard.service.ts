@@ -1,11 +1,30 @@
 /**
- * Returns the dashboard summary data.
+ * This file contains the service functions for the dashboard, which handle the business logic related to fetching and processing data for the dashboard view.
  * 
- */
-export function getDashboardSummary() {
+ * 
+ */ 
+
+import prisma from "../lib/prisma.js";
+
+export async function dashboardSummary() {
+  const transactions = await prisma.transaction.findMany({
+    select: {
+      amount: true,
+      type: true,
+    },
+  });
+
+  const income = transactions
+    .filter((transaction) => transaction.type.toLowerCase() === "income")
+    .reduce((total, transaction) => total + transaction.amount, 0);
+
+  const expenses = transactions
+    .filter((transaction) => transaction.type.toLowerCase() === "expense")
+    .reduce((total, transaction) => total + transaction.amount, 0);
+
   return {
-    balance: 4328.52,
-    income: 2800,
-    expenses: 1420,
+    income,
+    expenses,
+    balance: income - expenses,
   };
 }

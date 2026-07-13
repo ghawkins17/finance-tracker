@@ -35,3 +35,14 @@ export async function createTransaction(data: CreateTransactionData) {
         },
     });
 }
+
+/**
+ * Deletes a transaction from the PostgreSQL database.
+ */
+export async function deleteTransaction(id: number) {
+  return await prisma.transaction.delete({
+    where: {
+      id,
+    },
+  });
+}
