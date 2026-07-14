@@ -46,3 +46,31 @@ export async function deleteTransaction(id: number) {
     },
   });
 }
+
+
+type UpdateTransactionData = {
+  amount: number;
+  description: string;
+  category: string;
+  type: string;
+};
+
+/**
+ * Updates an existing transaction in PostgreSQL.
+ */
+export async function updateTransaction(
+  id: number,
+  data: UpdateTransactionData
+) {
+  return await prisma.transaction.update({
+    where: {
+      id,
+    },
+    data: {
+      amount: data.amount,
+      description: data.description,
+      category: data.category,
+      type: data.type,
+    },
+  });
+}

@@ -3,6 +3,7 @@ import {
   createTransaction as saveTransaction,
   deleteTransaction as removeTransaction,
   getRecentTransactions as fetchRecentTransactions,
+  updateTransaction as editTransaction,
 } from "../services/transaction.service.js";
 
 /**
@@ -88,6 +89,51 @@ export async function deleteTransaction(
 
     return res.status(500).json({
       message: "Failed to delete transaction.",
+    });
+  }
+}
+
+/**
+ * Updates an existing transaction by its ID.
+ */
+export async function updateTransaction(
+  req: Request,
+  res: Response
+) {
+  try {
+    const id = Number(req.params.id);
+    const { amount, description, category, type } = req.body;
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        message: "A valid transaction ID is required.",
+      });
+    }
+
+    if (
+      typeof amount !== "number" ||
+      typeof description !== "string" ||
+      typeof category !== "string" ||
+      (type !== "income" && type !== "expense")
+    ) {
+      return res.status(400).json({
+        message: "Valid amount, description, category, and type are required.",
+      });
+    }
+
+    const updatedTransaction = await editTransaction(id, {
+      amount,
+      description,
+      category,
+      type,
+    });
+
+    return res.json(updatedTransaction);
+  } catch (error) {
+    console.error("Error updating transaction:", error);
+
+    return res.status(500).json({
+      message: "Failed to update transaction.",
     });
   }
 }
