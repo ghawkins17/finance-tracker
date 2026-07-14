@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatCurrency } from "../utils/formatCurrency";
 import api from "../services/api";
 
 type Transaction = {
@@ -74,8 +75,8 @@ export default function RecentTransactions({
                     : "text-red-400"
                 }
               >
-                {transaction.type === "income" ? "+" : "-"}$
-                {Math.abs(transaction.amount).toFixed(2)}
+                {transaction.type === "income" ? "+" : "-"}
+                {formatCurrency(Math.abs(transaction.amount))}
               </span>
 
               <button

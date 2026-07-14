@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { formatCurrency } from "../utils/formatCurrency";
 import SummaryCard from "../components/SummaryCard";
 import RecentTransactions from "../components/RecentTransactions";
 import AddTransactionForm from "../components/AddTransactionForm";
@@ -41,9 +42,9 @@ export default function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <SummaryCard title="Balance" amount={`$${summary.balance.toFixed(2)}`} />
-        <SummaryCard title="Income" amount={`$${summary.income.toFixed(2)}`} />
-        <SummaryCard title="Expenses" amount={`$${summary.expenses.toFixed(2)}`} />
+        <SummaryCard title="Balance" amount={formatCurrency(summary.balance)} />
+        <SummaryCard title="Income" amount={formatCurrency(summary.income)} />
+        <SummaryCard title="Expenses" amount={formatCurrency(summary.expenses)} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
