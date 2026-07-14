@@ -37,7 +37,7 @@ export default function DashboardPage() {
       </div>
 
       <div className="mb-8 rounded-xl bg-slate-800 p-6">
-        <AddTransactionForm onTransactionAdded={handleTransactionAdded} />
+        <AddTransactionForm onTransactionAdded={handleTransactionChanged} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
@@ -47,12 +47,15 @@ export default function DashboardPage() {
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <RecentTransactions refreshKey={refreshKey} />
+        <RecentTransactions
+          refreshKey={refreshKey}
+          onTransactionDeleted={handleTransactionChanged}
+        />
       </div>
     </section>
   );
 
-  function handleTransactionAdded(){
+  function handleTransactionChanged(){
     setRefreshKey((currentKey) => currentKey + 1);
   }
 }
