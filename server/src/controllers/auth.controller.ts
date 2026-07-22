@@ -1,14 +1,14 @@
 import type { Request, Response } from "express";
 import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma.js";
+import jwt from "jsonwebtoken";
 
 /**
  * Creates a new user account.
  */
 export async function register(req: Request, res: Response) {
   try {
-    const { name, email, password } = req.body;
-
+    const { name, email, password } = req.body ?? {};
     if (
       typeof name !== "string" ||
       typeof email !== "string" ||
@@ -63,6 +63,80 @@ export async function register(req: Request, res: Response) {
 
     return res.status(500).json({
       message: "Failed to create account.",
+    });
+  }
+}
+
+/**
+ * Logs in an existing user.
+ */
+export async function login(req: Request, res: Response) {
+  try {
+    const { email, password } = req.body ?? {};
+
+    if (typeof email !== "string" || typeof password !== "string") {
+      return res.status(400).json({
+        message: "Email and password are required.",
+      });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    const user = await prisma.user.findUnique({
+      where: {
+        email: cleanEmail,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid email or password.",
+      });
+    }
+
+    const passwordMatches = await bcrypt.compare(
+      password,
+      user.passwordHash
+    );
+
+    if (!passwordMatches) {
+      return res.status(401).json({
+        message: "Invalid email or password.",
+      });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+
+    if (!jwtSecret) {
+      throw new Error("JWT_SECRET is not configured.");
+    }
+
+    const token = jwt.sign(
+      { userId: user.id },
+      jwtSecret,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("Error logging in:", error);
+
+    return res.status(500).json({
+      message: "Failed to log in.",
     });
   }
 }
