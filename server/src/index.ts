@@ -4,11 +4,14 @@ import cors from "cors";
 
 import dashboardRouter from "./routes/dashboard.route.js";
 import transactionRouter from "./routes/transaction.route.js";  
+import authRouter from "./routes/auth.route.js";
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use("/api/auth", authRouter);
+
 
 // api health check endpoint
 app.get("/api/health", (req, res) => {
@@ -38,3 +41,4 @@ const server = app.listen(PORT, "0.0.0.0", () => {
 server.on("error", (error) => {
     console.error("Server failed to start:", error);
 });
+

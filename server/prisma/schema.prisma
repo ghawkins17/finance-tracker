@@ -9,6 +9,16 @@ datasource db {
   provider = "postgresql"
 }
 
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  passwordHash String
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
 model Transaction {
   id          Int      @id @default(autoincrement())
   amount      Float
@@ -16,4 +26,7 @@ model Transaction {
   category    String
   type        String
   createdAt   DateTime @default(now())
+
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
