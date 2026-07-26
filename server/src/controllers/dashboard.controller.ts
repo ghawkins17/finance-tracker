@@ -11,7 +11,7 @@ export async function getDashboardSummary(
   res: Response
 ) {
   try {
-    const summary = await dashboardSummary();
+    const summary = await dashboardSummary(req.userId!);
 
     res.json(summary);
   } catch (error) {

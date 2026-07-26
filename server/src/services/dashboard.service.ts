@@ -6,8 +6,11 @@
 
 import prisma from "../lib/prisma.js";
 
-export async function dashboardSummary() {
+export async function dashboardSummary(userId: number) {
   const transactions = await prisma.transaction.findMany({
+    where: {
+      userId,
+    },
     select: {
       amount: true,
       type: true,
