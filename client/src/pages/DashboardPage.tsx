@@ -14,19 +14,31 @@ type DashboardSummary = {
 export default function DashboardPage() {
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     async function fetchSummary() {
-      const response = await api.get("/dashboard/summary");
-      setSummary(response.data);
+      try {
+        setError("");
+
+        const response = await api.get("/dashboard/summary");
+        setSummary(response.data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard summary:", error);
+        setError("You must log in to view the dashboard.");
+      }
     }
 
     fetchSummary();
   }, [refreshKey]);
 
-  if (!summary) {
-    return <p className="px-8 py-10 text-slate-400">Loading dashboard...</p>;
-  }
+if (error) {
+  return <p className="px-8 py-10 text-red-400">{error}</p>;
+}
+
+if (!summary) {
+  return <p className="px-8 py-10 text-slate-400">Loading dashboard...</p>;
+}
 
   return (
     <section className="mx-auto max-w-6xl px-8 py-10">

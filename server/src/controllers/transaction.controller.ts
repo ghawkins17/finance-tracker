@@ -14,7 +14,7 @@ export async function getRecentTransactions(
     res: Response
 ) {
     try {
-        const transactions = await fetchRecentTransactions();
+        const transactions = await fetchRecentTransactions(req.userId!);
 
         res.json(transactions);
     } catch (error) {
@@ -48,7 +48,7 @@ export async function createTransaction(
             });
         }
 
-        const transaction = await saveTransaction({
+        const transaction = await saveTransaction(req.userId!,{
             amount,
             description,
             category,
@@ -81,9 +81,15 @@ export async function deleteTransaction(
       });
     }
 
-    const deletedTransaction = await removeTransaction(id);
+    const deletedTransaction = await removeTransaction(id, req.userId!);
 
-    return res.json(deletedTransaction);
+    if (!deletedTransaction) {
+      return res.status(404).json({
+        message: "Transaction not found.",
+      });
+  }
+
+return res.json(deletedTransaction);
   } catch (error) {
     console.error("Error deleting transaction:", error);
 
@@ -121,13 +127,18 @@ export async function updateTransaction(
       });
     }
 
-    const updatedTransaction = await editTransaction(id, {
+    const updatedTransaction = await editTransaction(id, req.userId!, {
       amount,
       description,
       category,
       type,
     });
 
+    if (!updatedTransaction) {
+      return res.status(404).json({
+        message: "Transaction not found.",
+      });
+    }
     return res.json(updatedTransaction);
   } catch (error) {
     console.error("Error updating transaction:", error);

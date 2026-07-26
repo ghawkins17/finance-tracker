@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import api from "../services/api";
 
 type TransactionType = "income" | "expense";
 
@@ -35,25 +36,12 @@ export default function AddTransactionForm({ onTransactionAdded }: AddTransactio
             setIsSubmitting(true);
             setMessage("");
 
-            const response = await fetch(
-                "http://localhost:3000/api/transactions",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        amount: numericAmount,
-                        description: description.trim(),
-                        category: category.trim(),
-                        type,
-                    }),
-                }
-            );
-
-            if (!response.ok) {
-                throw new Error("Failed to create transaction.");
-            }
+            await api.post("/transactions", {
+                amount: numericAmount,
+                description: description.trim(),
+                category: category.trim(),
+                type,
+            });
             onTransactionAdded();
 
             setAmount("");

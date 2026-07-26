@@ -1,52 +1,68 @@
 import prisma from "../lib/prisma.js";
 
 /**
- * Retrieves all transactions from the PostgreSQL database.
- * Transactions are returned with the most recently created first.
+ * Retrieves transactions belonging to the logged-in user.
  */
-
-
-
-export async function getRecentTransactions() {
-    return await prisma.transaction.findMany({
-        orderBy: {
-            createdAt: "desc",
-        },
-    });
-}
-
-type CreateTransactionData = {
-    amount: number;
-    description: string;
-    category: string;
-    type: string;
-};
-
-/**
- * Creates a new transaction in the PostgreSQL database.
- */
-export async function createTransaction(data: CreateTransactionData) {
-    return await prisma.transaction.create({
-        data: {
-            amount: data.amount,
-            description: data.description,
-            category: data.category,
-            type: data.type,
-        },
-    });
-}
-
-/**
- * Deletes a transaction from the PostgreSQL database.
- */
-export async function deleteTransaction(id: number) {
-  return await prisma.transaction.delete({
+export async function getRecentTransactions(userId: number) {
+  return prisma.transaction.findMany({
     where: {
-      id,
+      userId,
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
 }
 
+type CreateTransactionData = {
+  amount: number;
+  description: string;
+  category: string;
+  type: string;
+};
+
+/**
+ * Creates a transaction belonging to the logged-in user.
+ */
+export async function createTransaction(
+  userId: number,
+  data: CreateTransactionData
+) {
+  return prisma.transaction.create({
+    data: {
+      amount: data.amount,
+      description: data.description,
+      category: data.category,
+      type: data.type,
+      userId,
+    },
+  });
+}
+
+/**
+ * Deletes a transaction only if it belongs to the logged-in user.
+ */
+export async function deleteTransaction(
+  id: number,
+  userId: number
+) {
+  const transaction = await prisma.transaction.findFirst({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  if (!transaction) {
+    return null;
+  }
+
+  return prisma.transaction.delete({
+    where: {
+      id: transaction.id,
+    },
+  });
+}
 
 type UpdateTransactionData = {
   amount: number;
@@ -56,15 +72,27 @@ type UpdateTransactionData = {
 };
 
 /**
- * Updates an existing transaction in PostgreSQL.
+ * Updates a transaction only if it belongs to the logged-in user.
  */
 export async function updateTransaction(
   id: number,
+  userId: number,
   data: UpdateTransactionData
 ) {
-  return await prisma.transaction.update({
+  const transaction = await prisma.transaction.findFirst({
     where: {
       id,
+      userId,
+    },
+  });
+
+  if (!transaction) {
+    return null;
+  }
+
+  return prisma.transaction.update({
+    where: {
+      id: transaction.id,
     },
     data: {
       amount: data.amount,
