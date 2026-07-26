@@ -140,3 +140,57 @@ export async function login(req: Request, res: Response) {
     });
   }
 }
+
+
+/**
+ * Logs out the current user by removing the authentication cookie.
+ */
+export function logout(_req: Request, res: Response) {
+  res.clearCookie("authToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  });
+
+  return res.json({
+    message: "Logged out successfully.",
+  });
+}
+
+
+/**
+ * Returns the currently authenticated user.
+ */
+export async function getCurrentUser(
+  req: Request,
+  res: Response
+) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.userId!,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "User not found.",
+      });
+    }
+
+    return res.json({
+      user,
+    });
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+
+    return res.status(500).json({
+      message: "Failed to fetch current user.",
+    });
+  }
+}
