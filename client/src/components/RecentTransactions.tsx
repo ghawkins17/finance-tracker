@@ -8,6 +8,7 @@ type Transaction = {
   category: string;
   amount: number;
   type: "income" | "expense";
+  transactionDate: string;
 };
 
 type EditForm = {
@@ -15,12 +16,17 @@ type EditForm = {
   category: string;
   amount: string;
   type: "income" | "expense";
+  transactionDate: string;
 };
 
 type RecentTransactionsProps = {
   refreshKey: number;
   onTransactionChanged: () => void;
 };
+
+function getDateInputValue(transactionDate: string) {
+  return transactionDate.slice(0, 10);
+}
 
 export default function RecentTransactions({
   refreshKey,
@@ -36,7 +42,12 @@ export default function RecentTransactions({
   useEffect(() => {
     async function fetchTransactions() {
       try {
-        const response = await api.get("/transactions/recent");
+        setError("");
+
+        const response = await api.get<Transaction[]>(
+          "/transactions/recent"
+        );
+
         setTransactions(response.data);
       } catch (error) {
         console.error("Failed to fetch transactions:", error);
@@ -49,12 +60,17 @@ export default function RecentTransactions({
 
   function startEditing(transaction: Transaction) {
     setEditingId(transaction.id);
+
     setEditForm({
       description: transaction.description,
       category: transaction.category,
       amount: transaction.amount.toString(),
       type: transaction.type,
+      transactionDate: transaction.transactionDate
+        ? getDateInputValue(transaction.transactionDate)
+        : "",
     });
+
     setError("");
   }
 
@@ -75,9 +91,12 @@ export default function RecentTransactions({
       !Number.isFinite(amount) ||
       amount <= 0 ||
       !editForm.description.trim() ||
-      !editForm.category.trim()
+      !editForm.category.trim() ||
+      !editForm.transactionDate
     ) {
-      setError("Enter a valid amount, description, and category.");
+      setError(
+        "Enter a valid amount, description, category, and date."
+      );
       return;
     }
 
@@ -90,6 +109,7 @@ export default function RecentTransactions({
         description: editForm.description.trim(),
         category: editForm.category.trim(),
         type: editForm.type,
+        transactionDate: editForm.transactionDate,
       });
 
       setEditingId(null);
@@ -109,6 +129,11 @@ export default function RecentTransactions({
       setError("");
 
       await api.delete(`/transactions/${id}`);
+
+      if (editingId === id) {
+        setEditingId(null);
+        setEditForm(null);
+      }
 
       onTransactionChanged();
     } catch (error) {
@@ -176,12 +201,27 @@ export default function RecentTransactions({
                   className="w-full rounded border border-slate-600 bg-slate-900 px-3 py-2"
                 />
 
+                <input
+                  type="date"
+                  value={editForm.transactionDate}
+                  onChange={(event) =>
+                    setEditForm({
+                      ...editForm,
+                      transactionDate: event.target.value,
+                    })
+                  }
+                  required
+                  className="w-full rounded border border-slate-600 bg-slate-900 px-3 py-2"
+                />
+
                 <select
                   value={editForm.type}
                   onChange={(event) =>
                     setEditForm({
                       ...editForm,
-                      type: event.target.value as "income" | "expense",
+                      type: event.target.value as
+                        | "income"
+                        | "expense",
                     })
                   }
                   className="w-full rounded border border-slate-600 bg-slate-900 px-3 py-2"
@@ -195,7 +235,7 @@ export default function RecentTransactions({
                     type="button"
                     onClick={() => handleUpdate(transaction.id)}
                     disabled={updatingId === transaction.id}
-                    className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-500 disabled:opacity-50"
+                    className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {updatingId === transaction.id
                       ? "Saving..."
@@ -206,7 +246,7 @@ export default function RecentTransactions({
                     type="button"
                     onClick={cancelEditing}
                     disabled={updatingId === transaction.id}
-                    className="rounded bg-slate-600 px-3 py-1 text-sm text-white hover:bg-slate-500 disabled:opacity-50"
+                    className="rounded bg-slate-600 px-3 py-1 text-sm text-white hover:bg-slate-500 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     Cancel
                   </button>
@@ -222,8 +262,17 @@ export default function RecentTransactions({
             >
               <div>
                 <p>{transaction.description}</p>
+
                 <p className="text-sm text-slate-400">
                   {transaction.category}
+                </p>
+
+                <p className="text-sm text-slate-500">
+                  {transaction.transactionDate
+                    ? getDateInputValue(
+                        transaction.transactionDate
+                      )
+                    : "No date"}
                 </p>
               </div>
 
@@ -236,13 +285,16 @@ export default function RecentTransactions({
                   }
                 >
                   {transaction.type === "income" ? "+" : "-"}
-                  {formatCurrency(Math.abs(transaction.amount))}
+                  {formatCurrency(
+                    Math.abs(transaction.amount)
+                  )}
                 </span>
 
                 <button
                   type="button"
                   onClick={() => startEditing(transaction)}
-                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-500"
+                  disabled={deletingId === transaction.id}
+                  className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Edit
                 </button>
@@ -263,7 +315,9 @@ export default function RecentTransactions({
         })}
 
         {transactions.length === 0 && (
-          <p className="text-slate-400">No transactions yet.</p>
+          <p className="text-slate-400">
+            No transactions yet.
+          </p>
         )}
       </div>
     </div>

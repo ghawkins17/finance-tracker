@@ -7,6 +7,13 @@ import {
 } from "react-router-dom";
 import api from "../services/api";
 
+
+export type AuthOutletContext = {
+  isAuthenticated: boolean;
+  isCheckingAuth: boolean;
+  setIsAuthenticated: (isAuthenticated: boolean) => void;
+};
+
 export default function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,6 +61,9 @@ export default function AppLayout() {
 
         <div className="flex items-center gap-4">
           <Link to="/">Dashboard</Link>
+          {!isCheckingAuth && isAuthenticated && (
+            <Link to="/transactions">Transactions</Link>
+          )}
 
           {!isCheckingAuth && !isAuthenticated && (
             <>
@@ -76,7 +86,13 @@ export default function AppLayout() {
       </nav>
 
       <main>
-        <Outlet />
+        <Outlet
+          context={{
+            isAuthenticated,
+            isCheckingAuth,
+            setIsAuthenticated,
+          }}
+        />
       </main>
     </div>
   );
