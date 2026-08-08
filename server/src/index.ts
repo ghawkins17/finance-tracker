@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import dashboardRouter from "./routes/dashboard.route.js";
 import transactionRouter from "./routes/transaction.route.js";  
 import authRouter from "./routes/auth.route.js";
+import budgetRouter from "./routes/budget.route.js";
 
 const app = express();
 
@@ -33,6 +34,7 @@ app.use("/api/dashboard", dashboardRouter);
 
 // Mounts all transaction-related API routes under /api/transactions.
 app.use("/api/transactions", transactionRouter);
+app.use("/api/budgets", budgetRouter);
 
 const PORT = Number(process.env.PORT) || 3000;
 
